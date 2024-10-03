@@ -1,0 +1,25 @@
+# Ignorar pastas do IntelliJ IDEA
+.idea/
+
+# Ignorar diretórios de build do Maven
+target/
+
+# Ignorar arquivos e diretórios relacionados ao Maven Wrapper (exceto .mvn/wrapper/)
+.mvn/
+!.mvn/wrapper/
+
+# Ignorar logs e arquivos temporários
+*.log
+*.tmp
+
+# Ignorar arquivos gerados automaticamente
+*.class
+*.war
+*.jar
+
+# Ignorar arquivos de configuração do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Ignorar outros arquivos temporários
+*.swp
