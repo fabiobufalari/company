@@ -12,29 +12,29 @@ public class CompanyDTO {
 
     private Long id; // The ID will be generated automatically
 
-    @NotNull(message = "Company name is required")
+    @NotNull(message = "{company.name.required}")
     private String name;
 
-    @NotNull(message = "Business Identification Number is required")
-    @Size(min = 9, max = 15, message = "Business Identification Number must be between 9 and 15 characters")
+    @NotNull(message = "{company.bin.required}")
+    @Size(min = 9, max = 15, message = "{company.bin.size}")
     private String businessIdentificationNumber;
 
-    @NotNull(message = "Address is required")
+    @NotNull(message = "{company.address.required}")
     private AddressDTO address;
 
-    @NotNull(message = "At least one contact is required")
+    @NotNull(message = "{company.contacts.required}")
     private List<ContactDTO> contacts;
 
-    @NotNull(message = "Main activity is required")
+    @NotNull(message = "{company.mainActivity.required}")
     private String mainActivity;
 
-    @NotNull(message = "Foundation date is required")
+    @NotNull(message = "{company.foundationDate.required}")
     private LocalDate foundationDate;
 
-    @NotNull(message = "Responsible person is required")
+    @NotNull(message = "{company.responsible.required}")
     private ManagerResponsibleDTO responsible;
 
-    @NotNull(message = "Manager is required")
+    @NotNull(message = "{company.manager.required}")
     private ManagerResponsibleDTO manager;
 
     private String googleMapsLink;

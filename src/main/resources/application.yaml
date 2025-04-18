@@ -1,0 +1,47 @@
+# Configuração da aplicação / Application configuration
+spring:
+  application:
+    name: company
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  sql:
+    init:
+      enabled: false
+
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Chave secreta compartilhada com o serviço de autenticação
+          # Shared secret key with the authentication service
+          secret: ${JWT_SECRET:umaSenhaMuitoSeguraParaJWT123456!}
+
+server:
+  port: 8084
+
+# Ativa o uso de HTTP Client no Feign (se necessário no futuro)
+feign:
+  httpclient:
+    enabled: true
+
+# Configurações do Swagger / Swagger configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method

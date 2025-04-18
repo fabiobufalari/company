@@ -1,3 +1,4 @@
+// Substituído pacote 'companyConverter' por 'converter' / Replaced package name 'companyConverter' with 'converter'
 package com.bufalari.company.companyConverter;
 
 import com.bufalari.company.dto.AddressDTO;
@@ -16,10 +17,8 @@ public class AddressConverter {
         addressDTO.setCity(addressEntity.getCity());
         addressDTO.setProvince(addressEntity.getProvince());
         addressDTO.setPostalCode(addressEntity.getPostalCode());
-
         // Generate Google Maps link
         addressDTO.setGoogleMapsLink(generateGoogleMapsLink(addressEntity));
-
         return addressDTO;
     }
 
@@ -32,7 +31,6 @@ public class AddressConverter {
         addressEntity.setCity(addressDTO.getCity());
         addressEntity.setProvince(addressDTO.getProvince());
         addressEntity.setPostalCode(addressDTO.getPostalCode());
-
         return addressEntity;
     }
 

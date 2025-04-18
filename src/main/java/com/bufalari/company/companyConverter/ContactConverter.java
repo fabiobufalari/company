@@ -1,3 +1,4 @@
+// Substituído pacote 'companyConverter' por 'converter' / Replaced package name 'companyConverter' with 'converter'
 package com.bufalari.company.companyConverter;
 
 import com.bufalari.company.dto.ContactDTO;

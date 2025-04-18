@@ -7,22 +7,22 @@ import lombok.Data;
 @Data
 public class AddressDTO {
 
-    @NotNull(message = "Street name is required")
+    @NotNull(message = "{address.street.required}")
     private String street;
 
-    @NotNull(message = "Street number is required")
+    @NotNull(message = "{address.number.required}")
     private String number;
 
     private String complement;
     private String neighbourhood;
 
-    @NotNull(message = "City is required")
+    @NotNull(message = "{address.city.required}")
     private String city;
 
-    @NotNull(message = "Province is required")
+    @NotNull(message = "{address.province.required}")
     private String province;
 
-    @NotNull(message = "Postal code is required")
+    @NotNull(message = "{address.postalCode.required}")
     private String postalCode;
 
     private String googleMapsLink;

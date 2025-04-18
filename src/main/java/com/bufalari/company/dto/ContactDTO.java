@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class ContactDTO {
 
-    @NotNull(message = "Contact type is required")
+    @NotNull(message = "{contact.type.required}")
     private String type; // E.g., "phone", "email"
 
-    @NotNull(message = "Contact value is required")
+    @NotNull(message = "{contact.value.required}")
     private String value; // E.g., phone number or email
 }

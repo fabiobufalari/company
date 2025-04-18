@@ -4,22 +4,21 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-
 @Data
 public class ManagerResponsibleDTO {
 
-    @NotNull(message = "Code is required")
+    @NotNull(message = "{managerResponsible.code.required}")
     private String code;
 
-    @NotNull(message = "Name is required")
+    @NotNull(message = "{managerResponsible.name.required}")
     private String name;
 
-    @NotNull(message = "Position is required")
+    @NotNull(message = "{managerResponsible.position.required}")
     private String position;
 
-    @NotNull(message = "Phone number is required")
+    @NotNull(message = "{managerResponsible.phone.required}")
     private String phone;
 
-    @Email(message = "Invalid email format")
+    @Email(message = "{managerResponsible.email.invalid}")
     private String email;
 }

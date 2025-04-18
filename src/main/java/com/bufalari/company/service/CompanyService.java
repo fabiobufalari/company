@@ -1,10 +1,9 @@
 package com.bufalari.company.service;
 
-
-
 import com.bufalari.company.companyConverter.CompanyConverter;
 import com.bufalari.company.dto.CompanyDTO;
 import com.bufalari.company.entity.CompanyEntity;
+import com.bufalari.company.exception.CompanyNotFoundException;  // Importa exceção personalizada / Imports custom CompanyNotFoundException
 import com.bufalari.company.repository.CompanyRepository;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +28,20 @@ public class CompanyService {
     }
 
     public Optional<CompanyDTO> getCompanyById(Long id) {
-        return companyRepository.findById(id).map(companyConverter::entityToDTO);
+        return companyRepository.findById(id)
+                .map(companyConverter::entityToDTO);
     }
 
     public List<CompanyDTO> getAllCompanies() {
-        return companyRepository.findAll().stream().map(companyConverter::entityToDTO).toList();
+        return companyRepository.findAll().stream()
+                .map(companyConverter::entityToDTO)
+                .toList();
     }
 
     public CompanyDTO updateCompany(Long id, CompanyDTO companyDTO) {
         if (!companyRepository.existsById(id)) {
-            throw new IllegalArgumentException("Company not found");
+            // Substituído IllegalArgumentException por CompanyNotFoundException / Replaced IllegalArgumentException with CompanyNotFoundException
+            throw new CompanyNotFoundException();
         }
         CompanyEntity companyEntity = companyConverter.dtoToEntity(companyDTO);
         companyEntity.setId(id);
