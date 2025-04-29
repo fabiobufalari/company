@@ -17,7 +17,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -74,3 +74,7 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+auth: # <<< Nível raiz
+  service: # <<< Nível 2
+    url: ${AUTH_SERVICE_URL:http://localhost:8083/api} # <<< Nível 3

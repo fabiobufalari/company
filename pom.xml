@@ -20,6 +20,7 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<spring-cloud.version>2023.0.2</spring-cloud.version>
 	</properties>
 
 	<dependencies>
@@ -93,13 +94,35 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<!-- JWT Library (JJWT) -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version> <!-- Use a versão consistente que definimos -->
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version> <!-- Use a versão consistente -->
+			<scope>runtime</scope> <!-- Implementação necessária apenas em runtime -->
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId> <!-- ou jjwt-gson se você usar Gson -->
+			<version>0.11.5</version> <!-- Use a versão consistente -->
+			<scope>runtime</scope> <!-- Necessário para serialização/desserialização JSON -->
+		</dependency>
+		<!-- Spring Cloud OpenFeign: Para clientes Feign -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+			<!-- A versão é gerenciada pelo BOM do Spring Cloud no dependencyManagement -->
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -120,5 +143,17 @@
 			</plugin>
 		</plugins>
 	</build>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- Outras dependências gerenciadas podem estar aqui -->
+		</dependencies>
+	</dependencyManagement>
 
 </project>
