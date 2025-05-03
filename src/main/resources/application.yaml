@@ -1,8 +1,12 @@
 # =========================================
+# MS company
+# =========================================
+
+# =========================================
 # Server Configuration
 # =========================================
 server:
-  port: 8082 # <<< Porta Exemplo para este serviço
+  port: 8081 # <<< Porta Exemplo para este serviço
 
 # =========================================
 # Spring Boot Application Configuration
@@ -11,9 +15,9 @@ spring:
   application:
     name: company-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/buildingDB # <<< BANCO CENTRALIZADO
-    username: postgres
-    password: postgres
+    url: ${DATASOURCE_URL} # <<< BANCO CENTRALIZADO
+    username: ${DATASOURCE_USERNAME_PROD}
+    password: ${DATASOURCE_PASSWORD_PROD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -34,12 +38,7 @@ spring:
 security:
   jwt:
     token:
-      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970!} # <<< CHAVE IDÊNTICA
-# Remover config antiga de oauth2/resourceserver se não for mais usada
-#  oauth2:
-#    resourceserver:
-#      jwt:
-#        secret: ${JWT_SECRET:umaSenhaMuitoSeguraParaJWT123456!} # Removido/Comentado
+      secret-key: ${JWT_SECRET_KEY} # <<< CHAVE IDÊNTICA
 
 # =========================================
 # Logging Configuration
@@ -77,4 +76,5 @@ management:
 
 auth: # <<< Nível raiz
   service: # <<< Nível 2
-    url: ${AUTH_SERVICE_URL:http://localhost:8083/api} # <<< Nível 3
+    url: ${AUTH_SERVICE_URL} # <<< Nível 3
+    #url: ${AUTH_SERVICE_URL:http://localhost:8083/api} # <<< Nível 3
