@@ -9,116 +9,151 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-// import org.springframework.security.oauth2.jwt.JwtException; // <<< REMOVER ESTE IMPORT
+// import org.springframework.security.oauth2.jwt.JwtException; // <<< REMOVER ESTE IMPORT (OAuth2)
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-// import java.security.SignatureException; // <<< REMOVER ESTE IMPORT
+// import java.security.SignatureException; // <<< REMOVER ESTE IMPORT (java.security)
 import java.util.Date;
 import java.util.function.Function;
 
 /**
- * Utility for handling JWT tokens, using a configured secret key.
- * Utilitário para manipulação de tokens JWT, usando uma chave secreta configurada.
+ * Utility for handling JWT tokens (validation, extraction) using a configured secret key.
+ * Utilitário para manipulação de tokens JWT (validação, extração), usando uma chave secreta configurada.
  */
 @Component
 public class JwtUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
+    // Injetar a chave secreta do application.yml/properties
     @Value("${security.jwt.token.secret-key}")
     private String configuredSecretKey;
 
-    private SecretKey secretKey;
+    private SecretKey secretKey; // Usar tipo SecretKey do javax.crypto
 
     @PostConstruct
     public void init() {
-        if (configuredSecretKey == null || configuredSecretKey.isBlank()) {
-            log.error("JWT secret key is not configured properly in application properties (security.jwt.token.secret-key)."); // Mensagem corrigida
-            throw new IllegalStateException("JWT secret key must be configured.");
+        // Validar se a chave foi configurada
+        if (configuredSecretKey == null || configuredSecretKey.isBlank() || "${security.jwt.token.secret-key}".equals(configuredSecretKey)) {
+            log.error("FATAL: JWT secret key ('security.jwt.token.secret-key') is not configured properly or is still the placeholder value.");
+            throw new IllegalStateException("JWT secret key must be configured with a real value.");
         }
+        // Avisar se a chave padrão/teste está em uso
+        if (configuredSecretKey.startsWith("DefaultWeakSecretKey") || configuredSecretKey.startsWith("TestSecretKey") || configuredSecretKey.startsWith("MySecureTestKey") || configuredSecretKey.equals("some-long-test-secret-key-cashflow")) {
+            log.warn("--------------------------------------------------------------------------------");
+            log.warn("WARNING: Using default/test JWT secret key. THIS IS INSECURE FOR PRODUCTION!");
+            log.warn("Ensure 'JWT_SECRET_KEY' environment variable or a secure application property is set.");
+            log.warn("--------------------------------------------------------------------------------");
+        }
+        // Validação básica do tamanho da chave (ex: para HS256, >= 256 bits / 32 bytes)
+        if (configuredSecretKey.getBytes(StandardCharsets.UTF_8).length < 32) {
+            log.warn("Configured JWT secret key is shorter than 32 bytes. This might be insecure for algorithms like HS256.");
+        }
+
         try {
+            // Criar a SecretKey a partir da string configurada
             this.secretKey = Keys.hmacShaKeyFor(configuredSecretKey.getBytes(StandardCharsets.UTF_8));
-            log.info("JWT Secret Key initialized successfully for Company Service."); // Mensagem específica
+            log.info("JWT Secret Key initialized successfully for Company Service.");
         } catch (Exception e) {
-            log.error("Error initializing JWT Secret Key from configured value.", e);
+            log.error("Error initializing JWT Secret Key from configured value: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to initialize JWT Secret Key", e);
         }
     }
 
-    public String extractUsername(String token) {
+    /**
+     * Extracts the username (subject) from the token.
+     */
+    public String extractUsername(String token) throws JwtException { // Lança exceção base JJWT
         return extractClaim(token, Claims::getSubject);
     }
 
-    public Date extractExpiration(String token) {
+    /**
+     * Extracts the expiration date from the token.
+     */
+    public Date extractExpiration(String token) throws JwtException { // Lança exceção base JJWT
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    /**
+     * Extracts a specific claim using a resolver function.
+     */
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) throws JwtException { // Lança exceção base JJWT
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // --- MÉTODO CORRIGIDO ---
     /**
-     * Parses the token and extracts all claims. Handles potential exceptions.
-     * Faz o parse do token e extrai todas as claims. Trata exceções potenciais.
-     * @param token The JWT token. / O token JWT.
-     * @return The Claims object. / O objeto Claims.
-     * @throws io.jsonwebtoken.JwtException if the token is invalid or cannot be parsed. / Se o token for inválido ou não puder ser parseado. // <<< TIPO CORRIGIDO
+     * Parses the token and extracts all claims, handling specific JJWT exceptions.
      */
-    private Claims extractAllClaims(String token) throws io.jsonwebtoken.JwtException { // <<< TIPO CORRIGIDO
+    private Claims extractAllClaims(String token) throws JwtException { // Lança exceção base JJWT
         try {
+            // Usa o parser builder com a chave secreta
             return Jwts.parserBuilder()
                     .setSigningKey(this.secretKey)
                     .build()
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(token) // Verifica assinatura e expiração
                     .getBody();
         } catch (ExpiredJwtException e) {
             log.warn("JWT token is expired: {}", e.getMessage());
-            throw e;
+            throw e; // Re-lança para ser tratada especificamente se necessário
         } catch (UnsupportedJwtException e) {
-            log.warn("JWT token is unsupported: {}", e.getMessage());
+            log.error("JWT token is unsupported: {}", e.getMessage());
             throw e;
         } catch (MalformedJwtException e) {
-            log.warn("JWT token is malformed: {}", e.getMessage());
+            log.error("JWT token is malformed: {}", e.getMessage());
             throw e;
-        } catch (io.jsonwebtoken.security.SignatureException e) { // <<< TIPO CORRIGIDO NO CATCH
-            log.warn("JWT signature validation failed: {}", e.getMessage());
+        } catch (SignatureException e) { // <<< Usar io.jsonwebtoken.security.SignatureException
+            log.error("JWT signature validation failed: {}", e.getMessage());
             throw e;
-        } catch (IllegalArgumentException e) {
-            log.warn("JWT token argument validation failed: {}", e.getMessage());
+        } catch (IllegalArgumentException e) { // Ex: token nulo ou vazio
+            log.error("JWT token argument invalid: {}", e.getMessage());
             throw e;
+        } catch (Exception e) { // Captura genérica para outros erros inesperados
+            log.error("Unexpected error parsing JWT: {}", e.getMessage(), e);
+            throw new JwtException("Unexpected error parsing JWT", e); // Envolve em JwtException
         }
-        // Qualquer outra JwtException será lançada implicitamente
     }
 
-    private Boolean isTokenExpired(String token) {
+    /**
+     * Checks if the token is expired.
+     */
+    private Boolean isTokenExpired(String token) throws JwtException { // Lança exceção base JJWT
         try {
             return extractExpiration(token).before(new Date());
         } catch (ExpiredJwtException e) {
-            return true;
-        } catch (io.jsonwebtoken.JwtException e) { // <<< Usar tipo base correto
-            log.warn("Could not determine expiration due to other JWT exception: {}", e.getMessage());
-            return true;
+            return true; // Se a exceção específica de expiração for lançada, está expirado
         }
+        // Outras exceções (Malformed, Signature, etc.) serão propagadas pelo extractExpiration
     }
 
+    /**
+     * Validates the token against UserDetails (username match and not expired).
+     */
     public Boolean validateToken(String token, UserDetails userDetails) {
+        if (token == null || userDetails == null) {
+            log.warn("Attempting to validate with null token or userDetails.");
+            return false;
+        }
         try {
             final String username = extractUsername(token);
-            // Adicionado null check para userDetails
-            if (userDetails == null) {
-                log.warn("UserDetails object provided for validation is null for token subject: {}", username);
-                return false;
-            }
+            // Verifica se o username do token bate com o UserDetails E se o token não está expirado
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-        } catch (io.jsonwebtoken.JwtException e) { // <<< Usar tipo base correto
-            // Logged in extractUsername or isTokenExpired
+        } catch (JwtException e) {
+            // O log do erro específico já ocorreu em extractUsername ou isTokenExpired
+            log.debug("Token validation failed due to JwtException: {}", e.getMessage());
+            return false; // Qualquer exceção do JJWT invalida o token
+        } catch (Exception e) {
+            log.error("Unexpected error during token validation for user '{}': {}", userDetails.getUsername(), e.getMessage(), e);
             return false;
         }
     }
 
-    // Métodos de geração de token podem permanecer comentados
+    // Métodos de geração de token não são necessários neste serviço.
+    // Manter comentados.
+    /*
+    public String generateToken(UserDetails userDetails) { ... }
+    private String createToken(Map<String, Object> claims, String subject) { ... }
+    */
 }

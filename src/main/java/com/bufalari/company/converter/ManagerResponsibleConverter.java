@@ -1,5 +1,5 @@
 // Substituído pacote 'companyConverter' por 'converter' / Replaced package name 'companyConverter' with 'converter'
-package com.bufalari.company.companyConverter;
+package com.bufalari.company.converter;
 
 import com.bufalari.company.dto.ManagerResponsibleDTO;
 import com.bufalari.company.entity.ManagerResponsibleEntity;
