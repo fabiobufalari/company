@@ -6,7 +6,9 @@
 # Server Configuration
 # =========================================
 server:
-  port: 8081 # <<< Porta Exemplo para este serviço
+  port: 8079 # <<< Porta Exemplo para este serviço
+  servlet:
+    context-path: /api # <<< MANTIDO O CONTEXT PATH /api
 
 # =========================================
 # Spring Boot Application Configuration
