@@ -19,6 +19,7 @@ public class AddressEntity { // <<< NÃO DEVE ESTENDER AuditableBaseEntity
     private String city;
     private String province;
     private String postalCode;
+    private String country;
 
     // Remover quaisquer campos de auditoria que possam ter sido copiados aqui
 }
